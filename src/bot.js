@@ -67,10 +67,6 @@ bot.launch()
         process.exit(1);
     });
 
-// Start Google Sheet auto-sync
-const { startAutoSync } = require('./services/sheetSync');
-startAutoSync();
-
 // Start Webhook server
 const { startWebhookServer } = require('./services/webhookService');
 startWebhookServer(bot);

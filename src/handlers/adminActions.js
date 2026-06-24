@@ -35,7 +35,7 @@ module.exports = (bot) => {
         const isLocal = !config.PUBLIC_URL || config.PUBLIC_URL.includes('localhost') || config.PUBLIC_URL.includes('127.0.0.1');
         const keyboardRows = [
             [Markup.button.callback('📦 Sản phẩm', 'adm_products'), Markup.button.callback('⏳ Đơn chờ', 'adm_pending')],
-            [Markup.button.callback('🔄 Sync Sheet', 'adm_sync'), Markup.button.callback('📊 Thống kê', 'adm_stats')]
+            [Markup.button.callback('📊 Thống kê', 'adm_stats')]
         ];
 
         if (!isLocal) {
@@ -75,8 +75,7 @@ module.exports = (bot) => {
             `🏦 <b>CÀI ĐẶT:</b>\n` +
             `/setbank — Xem thông tin ngân hàng\n` +
             `/setshop — Xem/sửa thông tin shop\n\n` +
-            `📊 <b>GOOGLE SHEET & KHÁC:</b>\n` +
-            `/sync — 🔄 Đồng bộ sản phẩm từ Google Sheet\n` +
+            `📊 <b>QUẢN TRỊ & THỐNG KÊ:</b>\n` +
             `/stats — Thống kê chi tiết\n` +
             `/users — Xem danh sách users\n` +
             `/broadcast — Gửi thông báo tới all users`,
@@ -134,10 +133,10 @@ module.exports = (bot) => {
     bot.action('adm_products', (ctx) => { if (isAdmin(ctx)) { ctx.answerCbQuery(); showProductList(ctx); } });
     bot.action('adm_pending', (ctx) => { if (isAdmin(ctx)) { ctx.answerCbQuery(); showPending(ctx); } });
     bot.action('adm_stats', (ctx) => { if (isAdmin(ctx)) { ctx.answerCbQuery(); showStats(ctx); } });
-    bot.action('adm_sync', async (ctx) => {
+    bot.action('adm_sync', (ctx) => {
         if (!isAdmin(ctx)) return;
-        ctx.answerCbQuery('🔄 Đang sync...');
-        await runSync(ctx);
+        ctx.answerCbQuery();
+        ctx.replyWithHTML('ℹ️ <b>Đồng bộ Google Sheet đã bị tắt</b> do hệ thống chuyển sang quản lý trực tiếp bằng Web Dashboard.');
     });
     bot.action('adm_no_url', (ctx) => {
         if (!isAdmin(ctx)) return;
@@ -152,43 +151,10 @@ module.exports = (bot) => {
         );
     });
 
-    // /sync - Manual sync from Google Sheet
-    bot.command('sync', adminOnly, async (ctx) => {
-        await runSync(ctx);
+    // /sync - Manual sync (Disabled)
+    bot.command('sync', adminOnly, (ctx) => {
+        ctx.replyWithHTML('ℹ️ <b>Đồng bộ Google Sheet đã bị tắt</b> do hệ thống chuyển sang quản lý trực tiếp bằng Web Dashboard.');
     });
-
-    async function runSync(ctx) {
-        const { syncFromSheet, SYNC_INTERVAL } = require('../services/sheetSync');
-        if (!process.env.GOOGLE_SHEET_ID) {
-            return ctx.replyWithHTML(
-                `❌ <b>Chưa cài đặt Google Sheet!</b>\n\n` +
-                `Thêm <code>GOOGLE_SHEET_ID</code> vào file .env\n\n` +
-                `📋 Hướng dẫn:\n` +
-                `1. Mở Google Sheet\n` +
-                `2. File → Chia sẻ → Xuất bản lên web → Xuất bản\n` +
-                `3. Copy Sheet ID từ URL:\n` +
-                `   <code>docs.google.com/spreadsheets/d/<b>[SHEET_ID]</b>/edit</code>\n` +
-                `4. Thêm vào .env:\n` +
-                `   <code>GOOGLE_SHEET_ID=your_sheet_id</code>\n` +
-                `5. Restart bot`
-            );
-        }
-
-        await ctx.replyWithHTML('🔄 Đang đồng bộ từ Google Sheet...');
-        const result = await syncFromSheet();
-
-        if (result && !result.error) {
-            ctx.replyWithHTML(
-                `✅ <b>Đồng bộ thành công!</b>\n\n` +
-                `├ ✏️ Đã cập nhật: ${result.updated} sản phẩm\n` +
-                `├ ➕ Đã thêm mới: ${result.added} sản phẩm\n` +
-                `└ 📊 Tổng: ${result.total} sản phẩm\n\n` +
-                `🔄 Tự động sync mỗi ${SYNC_INTERVAL} phút`
-            );
-        } else {
-            ctx.replyWithHTML(`❌ Lỗi sync: ${result?.error || 'Unknown error'}\n\n💡 Kiểm tra Sheet đã "Xuất bản lên web" chưa.`);
-        }
-    }
 
     // ═══════════════════════════════════════
     // QUẢN LÝ SẢN PHẨM
