@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản trị — DVTT Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(17, 24, 39, 0.95);
+            border-right: 1px solid var(--card-border);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .brand-icon {
+            font-size: 2rem;
+            animation: spin 8s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(365deg); }
+        }
+
+        .brand h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item.active a, .menu-item a:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item.active a {
+            border-left: 3px solid var(--accent-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 10px;
+            color: var(--accent-red);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-logout:hover {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        /* Main content wrapper */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.8px;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .db-status {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .db-status::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 35px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+        }
+
+        .kpi-icon {
+            font-size: 1.5rem;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* KPI Specific Colors */
+        .kpi-revenue .kpi-icon { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+        .kpi-orders .kpi-icon { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .kpi-users .kpi-icon { background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); }
+        .kpi-stock .kpi-icon { background: rgba(245, 158, 11, 0.1); color: var(--accent-orange); }
+
+        /* Chart container */
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            margin-bottom: 35px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Details columns grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            margin-bottom: 35px;
+        }
+
+        @media (max-width: 900px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Tables & Lists style */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 12px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Stock progress bars list */
+        .stock-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stock-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stock-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .stock-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+
+        .stock-badge {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .badge-ok { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .badge-low { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .badge-empty { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Status badge */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .status-delivered { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .status-paid { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+        .status-cancelled { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        /* Full width recent orders card */
+        .orders-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .badge-kpi {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        /* Modal Dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-red);
+        }
+
+        /* Forms in Modal */
+        .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Action buttons in lists */
+        .btn-action-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+
+        .btn-action-edit {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-action-delete {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-action-toggle {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Layout -->
+    <div class="sidebar">
+        <div class="brand">
+            <span class="brand-icon">🤖</span>
+            <h2>DVTT Admin</h2>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active" id="tab-overview">
+                <a href="#" onclick="switchTab('overview')">
+                    <span>📊</span> Tổng quan Shop
+                </a>
+            </li>
+            <li class="menu-item" id="tab-products">
+                <a href="#" onclick="switchTab('products')">
+                    <span>📦</span> Quản lý Sản phẩm
+                </a>
+            </li>
+            <li class="menu-item" id="tab-stock">
+                <a href="#" onclick="switchTab('stock')">
+                    <span>🏪</span> Quản lý Kho hàng
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn-logout" onclick="logout()">
+                <span>🚪</span> Đăng xuất
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="main-content">
+        <div class="header">
+            <div class="header-title">
+                <h1 id="shop-title">DVTT Shop</h1>
+                <p>Theo dõi kết quả kinh doanh và tồn kho thời gian thực</p>
+            </div>
+            <div class="db-status">Cơ sở dữ liệu: Live</div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             OVERVIEW VIEW
+             ═══════════════════════════════════════ -->
+        <div id="content-overview" class="tab-pane">
+            <!-- KPI Cards Grid -->
+            <div class="kpi-grid">
+                <div class="kpi-card kpi-revenue">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Doanh thu</span>
+                        <span class="kpi-icon">💰</span>
+                    </div>
+                    <span class="kpi-value" id="kpi-revenue">0đ</span>
+                </div>
+                <div class="kpi-card kpi-orders">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Đơn hàng hoàn tất</span>
+                        <span class="kpi-icon">📦</span>
+                    </div>
+                    <span class="kpi-value" id="kpi-orders">0</span>
+                </div>
+                <div class="kpi-card kpi-users">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Khách hàng</span>
+                        <span class="kpi-icon">👥</span>
+                    </div>
+                    <span class="kpi-value" id="kpi-users">0</span>
+                </div>
+                <div class="kpi-card kpi-stock">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Tổng tồn kho thực</span>
+                        <span class="kpi-icon">🏪</span>
+                    </div>
+                    <span class="kpi-value" id="kpi-stock">0</span>
+                </div>
+            </div>
+
+            <!-- Sales Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Biểu đồ tăng trưởng doanh số (7 ngày gần đây)</span>
+                    <span class="badge-kpi">Đơn vị: VNĐ</span>
+                </div>
+                <div style="height: 320px; width: 100%;">
+                    <canvas id="revenue-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Analytics Grid -->
+            <div class="details-grid">
+                <!-- Best Sellers Card -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span>🔥 Top mặt hàng bán chạy nhất</span>
+                        <span class="badge-kpi">Được mua nhiều</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th style="text-align: center;">Số lượng bán</th>
+                                    <th style="text-align: right;">Doanh thu sản phẩm</th>
+                                </tr>
+                            </thead>
+                            <tbody id="best-sellers-list">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; color: var(--text-muted);">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Inventory Health Card -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span>⚠️ Trạng thái tồn kho sản phẩm</span>
+                        <span class="badge-kpi">Kiểm tra thực tế</span>
+                    </div>
+                    <div class="stock-list" id="inventory-list">
+                        <p style="text-align: center; color: var(--text-muted);">Đang tải dữ liệu...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions Card -->
+            <div class="orders-card">
+                <div class="section-title" style="margin-bottom: 20px;">
+                    <span>📋 Danh sách 10 giao dịch gần đây nhất</span>
+                    <span class="badge-kpi">Thời gian thực</span>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Đơn #</th>
+                                <th>Khách hàng (Telegram)</th>
+                                <th>Sản phẩm</th>
+                                <th style="text-align: center;">Số lượng</th>
+                                <th style="text-align: right;">Tổng giá trị</th>
+                                <th style="text-align: center;">Trạng thái</th>
+                                <th>Ngày tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-orders-list">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted);">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             PRODUCTS VIEW
+             ═══════════════════════════════════════ -->
+        <div id="content-products" class="tab-pane" style="display: none;">
+            <div class="orders-card">
+                <div class="section-title" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📦 Danh sách sản phẩm của Shop</span>
+                    <button class="btn btn-primary" onclick="openAddProductModal()">➕ Thêm sản phẩm mới</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th style="text-align: right;">Đơn giá</th>
+                                <th style="text-align: center;">Tồn kho</th>
+                                <th style="text-align: center;">Trạng thái</th>
+                                <th style="text-align: center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted);">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             STOCK VIEW
+             ═══════════════════════════════════════ -->
+        <div id="content-stock" class="tab-pane" style="display: none;">
+            <div class="details-grid" style="grid-template-columns: 1fr 1.5fr;">
+                <!-- Left Column: Select and Import -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span>📥 Nhập kho tài khoản</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock-product-select">Chọn sản phẩm</label>
+                        <select id="stock-product-select" class="form-control" onchange="onStockProductChange()">
+                            <option value="">-- Chọn sản phẩm --</option>
+                        </select>
+                    </div>
+                    <div id="import-form-area" style="display: none; flex-direction: column; gap: 15px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label for="stock-import-data">Dữ liệu tài khoản (Mỗi dòng 1 cái)</label>
+                            <textarea id="stock-import-data" class="form-control" rows="8" placeholder="Ví dụ:&#10;user1|pass1|extra1&#10;user2|pass2|extra2"></textarea>
+                        </div>
+                        <button class="btn btn-success" onclick="importStock()">📥 Tiến hành Nhập kho</button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Stock list -->
+                <div class="section-card">
+                    <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>🏪 Tài khoản chưa bán trong kho</span>
+                        <button class="btn btn-danger" id="btn-clear-stock" style="display: none; padding: 6px 12px; font-size: 0.85rem;" onclick="clearStock()">🗑️ Xóa sạch kho chưa bán</button>
+                    </div>
+                    <div id="stock-items-info" style="color: var(--text-muted); text-align: center; padding: 20px 0;">
+                        Hãy chọn một sản phẩm ở cột bên trái để xem chi tiết tài khoản trong kho.
+                    </div>
+                    <div class="table-responsive" id="stock-table-area" style="display: none; max-height: 400px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Dữ liệu tài khoản</th>
+                                    <th style="text-align: center;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-table-body">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal (Add/Edit) -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Thêm sản phẩm mới</h3>
+                <span class="close-btn" onclick="closeProductModal()">&times;</span>
+            </div>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <input type="hidden" id="product-id-val">
+                <div class="form-group">
+                    <label for="product-category">Danh mục sản phẩm</label>
+                    <select id="product-category" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="product-name">Tên sản phẩm</label>
+                    <input type="text" id="product-name" class="form-control" required placeholder="Ví dụ: Netflix Premium 1 tháng">
+                </div>
+                <div class="form-group">
+                    <label for="product-price">Giá bán (VNĐ)</label>
+                    <input type="number" id="product-price" class="form-control" required min="0" placeholder="Ví dụ: 50000">
+                </div>
+                <div class="form-group">
+                    <label for="product-emoji">Emoji đại diện</label>
+                    <input type="text" id="product-emoji" class="form-control" placeholder="Mặc định: 📦" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label for="product-promotion">Thông tin khuyến mãi (nếu có)</label>
+                    <input type="text" id="product-promotion" class="form-control" placeholder="Ví dụ: Tặng kèm tài khoản phụ">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="product-contact-only">
+                    <label for="product-contact-only" style="cursor: pointer;">💬 Chat với Admin để mua hàng (Contact Only)</label>
+                </div>
+                <div class="form-group checkbox-group" id="group-active-state" style="display: none;">
+                    <input type="checkbox" id="product-is-active" checked>
+                    <label for="product-is-active" style="cursor: pointer;">🟢 Đang kinh doanh (Mở bán)</label>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Format price helper
+        function formatPrice(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+        }
+
+        // Format Date helper
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        let revenueChart = null;
+
+        // Fetch data function
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('/admin/api/stats');
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    return;
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    updateDashboard(data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch stats:', err);
+            }
+        }
+
+        // Update DOM elements
+        function updateDashboard(data) {
+            // Update Shop Name
+            document.title = `Dashboard Quản trị — ${data.shopName}`;
+            document.getElementById('shop-title').textContent = data.shopName;
+
+            // Update KPI
+            document.getElementById('kpi-revenue').textContent = formatPrice(data.stats.totalRevenue);
+            document.getElementById('kpi-orders').textContent = data.stats.totalOrders;
+            document.getElementById('kpi-users').textContent = data.stats.totalUsers;
+            document.getElementById('kpi-stock').textContent = data.stats.totalStock;
+
+            // Render Best Sellers
+            const bestSellersBody = document.getElementById('best-sellers-list');
+            if (data.bestSellers.length === 0) {
+                bestSellersBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Chưa có sản phẩm nào bán chạy.</td></tr>`;
+            } else {
+                bestSellersBody.innerHTML = data.bestSellers.map(item => `
+                    <tr>
+                        <td><b>${item.name}</b></td>
+                        <td style="text-align: center; font-weight: 600;">${item.total_qty} cái</td>
+                        <td style="text-align: right; color: var(--accent-blue); font-weight: 600;">${formatPrice(item.product_revenue)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render Inventory
+            const inventoryContainer = document.getElementById('inventory-list');
+            if (data.inventory.length === 0) {
+                inventoryContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted);">Chưa có sản phẩm nào đang mở bán.</p>`;
+            } else {
+                inventoryContainer.innerHTML = data.inventory.map(item => {
+                    // Check stock status
+                    const stockVal = item.real_stock;
+                    let badgeClass = 'badge-ok';
+                    let badgeText = 'Còn hàng';
+                    let barColor = 'var(--accent-green)';
+                    
+                    if (stockVal === 0) {
+                        badgeClass = 'badge-empty';
+                        badgeText = 'Hết hàng';
+                        barColor = 'var(--accent-red)';
+                    } else if (stockVal <= 2) {
+                        badgeClass = 'badge-low';
+                        badgeText = 'Sắp hết';
+                        barColor = 'var(--accent-orange)';
+                    }
+
+                    // Calculate progress percentage (max stock 15 for visualization)
+                    const percent = Math.min((stockVal / 15) * 100, 100);
+
+                    return `
+                        <div class="stock-item">
+                            <div class="stock-info">
+                                <span class="stock-name" title="${item.name}">${item.name}</span>
+                                <div>
+                                    <span style="margin-right: 8px; font-weight: 600;">Tồn kho: ${stockVal}</span>
+                                    <span class="stock-badge ${badgeClass}">${badgeText}</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: ${percent}%; background-color: ${barColor};"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render Recent Orders
+            const recentOrdersBody = document.getElementById('recent-orders-list');
+            if (data.recentOrders.length === 0) {
+                recentOrdersBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chưa phát sinh giao dịch nào.</td></tr>`;
+            } else {
+                recentOrdersBody.innerHTML = data.recentOrders.map(order => `
+                    <tr>
+                        <td><code>#${order.id}</code></td>
+                        <td>${order.user_name} (<code>${order.user_id}</code>)</td>
+                        <td><b>${order.product_name}</b></td>
+                        <td style="text-align: center;">${order.quantity}</td>
+                        <td style="text-align: right; font-weight: 600;">${formatPrice(order.total_price)}</td>
+                        <td style="text-align: center;">
+                            <span class="status-badge status-${order.status}">${order.status}</span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">${formatDate(order.created_at)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render Chart
+            renderChart(data.weeklyRevenue);
+        }
+
+        // Render Chart.js
+        function renderChart(weeklyData) {
+            const ctx = document.getElementById('revenue-chart').getContext('2d');
+            
+            // Prepare dates and revenues
+            // Fallback if no weekly revenue data yet
+            const labels = [];
+            const revenueValues = [];
+            const orderValues = [];
+
+            if (weeklyData.length === 0) {
+                // Generate dummy 7 days labels for visualization if no data
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    labels.push(`${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`);
+                    revenueValues.push(0);
+                    orderValues.push(0);
+                }
+            } else {
+                weeklyData.forEach(item => {
+                    const d = new Date(item.order_date);
+                    labels.push(`${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`);
+                    revenueValues.push(item.daily_revenue);
+                    orderValues.push(item.daily_orders);
+                });
+            }
+
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Doanh thu (VNĐ)',
+                            data: revenueValues,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#3b82f6',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Số đơn hàng',
+                            data: orderValues,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.2,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#10b981',
+                            yAxisID: 'y1',
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: 'Outfit'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.03)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: 'Outfit' }
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: 'Outfit' },
+                                callback: function(value) {
+                                    return value >= 1000 ? (value / 1000) + 'k' : value;
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: 'Outfit' },
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tab switching logic
+        let activeTab = 'overview';
+        function switchTab(tabId) {
+            activeTab = tabId;
+            // Update sidebar navigation active state
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+            // Show target tab pane
+            document.getElementById(`content-${tabId}`).style.display = 'block';
+
+            if (tabId === 'overview') {
+                fetchDashboardData();
+            } else if (tabId === 'products') {
+                loadProductsPage();
+            } else if (tabId === 'stock') {
+                loadStockPage();
+            }
+        }
+
+        // Global states
+        let allProducts = [];
+        let allCategories = [];
+
+        // ═══════════════════════════════════════
+        // PRODUCTS MANAGEMENT SCRIPTS
+        // ═══════════════════════════════════════
+        
+        async function loadProductsPage() {
+            try {
+                const response = await fetch('/admin/api/products');
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    return;
+                }
+                const data = await response.json();
+                if (data.success) {
+                    allProducts = data.products;
+                    allCategories = data.categories;
+                    renderProductsTable();
+                    populateCategoryDropdown();
+                }
+            } catch (err) {
+                console.error('Failed to load products:', err);
+            }
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('products-table-body');
+            if (allProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chưa có sản phẩm nào.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allProducts.map(p => {
+                const statusBadge = p.is_active 
+                    ? `<span class="status-badge status-delivered">🟢 Đang bán</span>`
+                    : `<span class="status-badge status-cancelled">🔴 Tạm ngắt</span>`;
+
+                return `
+                    <tr>
+                        <td><code>#${p.id}</code></td>
+                        <td><b>${p.emoji} ${p.name}</b></td>
+                        <td><span class="badge-kpi">${p.category_emoji} ${p.category_name}</span></td>
+                        <td style="text-align: right; font-weight: 600; color: var(--accent-blue);">${formatPrice(p.price)}</td>
+                        <td style="text-align: center; font-weight: 600;">${p.stock_count} cái</td>
+                        <td style="text-align: center;">${statusBadge}</td>
+                        <td style="text-align: center;">
+                            <div class="btn-action-group" style="justify-content: center;">
+                                <button class="btn-action btn-action-edit" onclick="openEditProductModal(${p.id})">✏️ Sửa</button>
+                                <button class="btn-action btn-action-toggle" onclick="toggleProductActive(${p.id}, ${p.is_active})">🔄 Bật/Tắt</button>
+                                <button class="btn-action btn-action-delete" onclick="deleteProduct(${p.id})">🗑️ Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function populateCategoryDropdown() {
+            const select = document.getElementById('product-category');
+            select.innerHTML = allCategories.map(c => `
+                <option value="${c.id}">${c.emoji} ${c.name}</option>
+            `).join('');
+        }
+
+        // Modals management
+        const productModal = document.getElementById('product-modal');
+        
+        function openAddProductModal() {
+            document.getElementById('modal-title').textContent = 'Thêm sản phẩm mới';
+            document.getElementById('product-id-val').value = '';
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-emoji').value = '';
+            document.getElementById('product-promotion').value = '';
+            document.getElementById('product-contact-only').checked = false;
+            document.getElementById('group-active-state').style.display = 'none';
+            productModal.classList.add('active');
+        }
+
+        function openEditProductModal(id) {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('modal-title').textContent = `Chỉnh sửa sản phẩm #${id}`;
+            document.getElementById('product-id-val').value = p.id;
+            document.getElementById('product-category').value = p.category_id;
+            document.getElementById('product-name').value = p.name;
+            document.getElementById('product-price').value = p.price;
+            document.getElementById('product-emoji').value = p.emoji;
+            document.getElementById('product-promotion').value = p.promotion || '';
+            document.getElementById('product-contact-only').checked = p.contact_only === 1;
+            
+            document.getElementById('group-active-state').style.display = 'flex';
+            document.getElementById('product-is-active').checked = p.is_active === 1;
+            
+            productModal.classList.add('active');
+        }
+
+        function closeProductModal() {
+            productModal.classList.remove('active');
+        }
+
+        async function saveProduct(event) {
+            event.preventDefault();
+            const id = document.getElementById('product-id-val').value;
+            const category_id = document.getElementById('product-category').value;
+            const name = document.getElementById('product-name').value.trim();
+            const price = document.getElementById('product-price').value;
+            const emoji = document.getElementById('product-emoji').value.trim();
+            const promotion = document.getElementById('product-promotion').value.trim();
+            const contact_only = document.getElementById('product-contact-only').checked;
+            const is_active = document.getElementById('product-is-active').checked;
+
+            const url = id ? '/admin/api/products/edit' : '/admin/api/products/add';
+            const payload = {
+                id,
+                category_id,
+                name,
+                price,
+                emoji,
+                promotion: promotion || null,
+                contact_only,
+                is_active
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    closeProductModal();
+                    loadProductsPage();
+                } else {
+                    alert(result.error || 'Có lỗi xảy ra khi lưu sản phẩm.');
+                }
+            } catch (err) {
+                console.error('Save product error:', err);
+                alert('Không thể kết nối đến máy chủ.');
+            }
+        }
+
+        async function toggleProductActive(id, currentState) {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+            
+            const payload = {
+                id: p.id,
+                category_id: p.category_id,
+                name: p.name,
+                price: p.price,
+                emoji: p.emoji,
+                promotion: p.promotion,
+                contact_only: p.contact_only,
+                is_active: currentState ? 0 : 1
+            };
+
+            try {
+                const response = await fetch('/admin/api/products/edit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    loadProductsPage();
+                }
+            } catch (err) {
+                console.error('Toggle active status error:', err);
+            }
+        }
+
+        async function deleteProduct(id) {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+
+            if (confirm(`⚠️ Cảnh báo: Bạn có chắc chắn muốn xóa sản phẩm "${p.name}"?\n\nHành động này cũng sẽ xóa sạch kho tài khoản chưa bán của sản phẩm!`)) {
+                try {
+                    const response = await fetch('/admin/api/products/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id })
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        loadProductsPage();
+                    } else {
+                        alert(result.error || 'Lỗi khi xóa sản phẩm');
+                    }
+                } catch (err) {
+                    console.error('Delete product error:', err);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════
+        // STOCK MANAGEMENT SCRIPTS
+        // ═══════════════════════════════════════
+
+        async function loadStockPage() {
+            try {
+                const response = await fetch('/admin/api/products');
+                const data = await response.json();
+                if (data.success) {
+                    allProducts = data.products;
+                    populateStockProductDropdown();
+                }
+            } catch (err) {
+                console.error('Failed to load stock page products:', err);
+            }
+        }
+
+        function populateStockProductDropdown() {
+            const select = document.getElementById('stock-product-select');
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">-- Chọn sản phẩm --</option>' + allProducts.map(p => `
+                <option value="${p.id}">#${p.id} ${p.name} (Kho: ${p.stock_count})</option>
+            `).join('');
+
+            // Restore selection if it still exists
+            if (currentValue && allProducts.some(x => x.id === parseInt(currentValue))) {
+                select.value = currentValue;
+            } else {
+                document.getElementById('import-form-area').style.display = 'none';
+                document.getElementById('stock-table-area').style.display = 'none';
+                document.getElementById('btn-clear-stock').style.display = 'none';
+                document.getElementById('stock-items-info').style.display = 'block';
+                document.getElementById('stock-items-info').innerHTML = 'Hãy chọn một sản phẩm ở cột bên trái để xem chi tiết tài khoản trong kho.';
+            }
+        }
+
+        function onStockProductChange() {
+            const productId = document.getElementById('stock-product-select').value;
+            if (!productId) {
+                document.getElementById('import-form-area').style.display = 'none';
+                document.getElementById('stock-table-area').style.display = 'none';
+                document.getElementById('btn-clear-stock').style.display = 'none';
+                document.getElementById('stock-items-info').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('import-form-area').style.display = 'flex';
+            document.getElementById('stock-items-info').style.display = 'none';
+            document.getElementById('stock-table-area').style.display = 'block';
+            document.getElementById('btn-clear-stock').style.display = 'block';
+
+            loadStockItems(productId);
+        }
+
+        async function loadStockItems(productId) {
+            try {
+                const response = await fetch(`/admin/api/stock?product_id=${productId}`);
+                const data = await response.json();
+                if (data.success) {
+                    renderStockTable(data.items);
+                }
+            } catch (err) {
+                console.error('Failed to load stock items:', err);
+            }
+        }
+
+        function renderStockTable(items) {
+            const tbody = document.getElementById('stock-table-body');
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Kho trống! Chưa có tài khoản nào được nhập.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = items.map((item, idx) => `
+                <tr>
+                    <td><code>#${item.id}</code></td>
+                    <td style="font-family: monospace; word-break: break-all;"><code>${item.data}</code></td>
+                    <td style="text-align: center;">
+                        <button class="btn-action btn-action-delete" onclick="deleteStockItem(${item.id})">🗑️ Xóa lẻ</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function importStock() {
+            const productId = document.getElementById('stock-product-select').value;
+            const textarea = document.getElementById('stock-import-data');
+            const data = textarea.value.trim();
+
+            if (!productId || !data) {
+                alert('Vui lòng chọn sản phẩm và nhập dữ liệu tài khoản cần thêm!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/api/stock/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, stock_data: data })
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    alert(`✅ Nhập kho thành công ${result.count} tài khoản!`);
+                    textarea.value = '';
+                    // Reload dropdown and inventory table
+                    await loadStockPage();
+                    onStockProductChange();
+                } else {
+                    alert(result.error || 'Lỗi khi nhập kho.');
+                }
+            } catch (err) {
+                console.error('Import stock error:', err);
+            }
+        }
+
+        async function deleteStockItem(itemId) {
+            if (confirm('Bạn có chắc chắn muốn xóa tài khoản này khỏi kho?')) {
+                try {
+                    const response = await fetch('/admin/api/stock/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: itemId })
+                    });
+                    if (response.ok) {
+                        // Reload data
+                        const productId = document.getElementById('stock-product-select').value;
+                        await loadStockPage();
+                        loadStockItems(productId);
+                    }
+                } catch (err) {
+                    console.error('Delete stock item error:', err);
+                }
+            }
+        }
+
+        async function clearStock() {
+            const productId = document.getElementById('stock-product-select').value;
+            if (!productId) return;
+
+            if (confirm('⚠️ Cảnh báo cực kỳ quan trọng:\n\nBạn có thực sự muốn XÓA TOÀN BỘ tài khoản chưa bán của sản phẩm này khỏi kho?')) {
+                try {
+                    const response = await fetch('/admin/api/stock/clear', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ product_id: productId })
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        alert(`🗑️ Đã xóa sạch ${result.changes} tài khoản khỏi kho.`);
+                        await loadStockPage();
+                        onStockProductChange();
+                    }
+                } catch (err) {
+                    console.error('Clear stock error:', err);
+                }
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            if (confirm('Bạn có muốn đăng xuất khỏi Dashboard không?')) {
+                window.location.href = '/admin/logout';
+            }
+        }
+
+        // Initialize dashboard overview tab by default
+        switchTab('overview');
+
+        // Auto refresh overview data every 30 seconds (only if active tab is overview)
+        setInterval(() => {
+            if (activeTab === 'overview') {
+                fetchDashboardData();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

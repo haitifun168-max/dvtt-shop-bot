@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Admin — DVTT Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background animated blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 1;
+            opacity: 0.5;
+            animation: float 12s infinite alternate;
+        }
+
+        .blob-1 {
+            width: 300px;
+            height: 300px;
+            background: #4f46e5;
+            top: -50px;
+            left: -50px;
+        }
+
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: #06b6d4;
+            bottom: -100px;
+            right: -50px;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, 60px) scale(1.1); }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo-area {
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+            color: #fca5a5;
+            margin-bottom: 20px;
+            display: none;
+            text-align: left;
+            animation: shake 0.4s ease;
+        }
+
+        .info-message {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+            color: #a7f3d0;
+            margin-bottom: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .btn-otp {
+            width: 100%;
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            color: #3b82f6;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-otp:hover:not(:disabled) {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: #3b82f6;
+        }
+
+        .btn-otp:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            color: var(--text-muted);
+            border-color: var(--glass-border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-area">
+                <span class="logo-icon">🔑</span>
+                <h1>Hệ thống Quản trị</h1>
+                <p class="subtitle">Xác thực đăng nhập bằng OTP Telegram</p>
+            </div>
+
+            <div class="error-message" id="error-box"></div>
+            <div class="info-message" id="info-box"></div>
+
+            <button type="button" class="btn-otp" id="btn-send-otp">
+                <span>💬</span> Gửi mã OTP qua Telegram
+            </button>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="otp">Mã xác thực OTP</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="otp" placeholder="Nhập mã OTP 6 chữ số" required maxlength="6" pattern="\d{6}" autocomplete="one-time-code">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Đăng nhập hệ thống</button>
+            </form>
+
+            <div class="footer">
+                &copy; 2026 DVTT Shop Bot. Bảo mật bởi SePay.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('login-form');
+        const otpInput = document.getElementById('otp');
+        const btnSendOtp = document.getElementById('btn-send-otp');
+        const errorBox = document.getElementById('error-box');
+        const infoBox = document.getElementById('info-box');
+
+        // Check if error query is in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            errorBox.textContent = 'Phiên làm việc hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.';
+            errorBox.style.display = 'block';
+        }
+
+        // Send OTP handler
+        btnSendOtp.addEventListener('click', async () => {
+            errorBox.style.display = 'none';
+            infoBox.style.display = 'none';
+            btnSendOtp.disabled = true;
+            btnSendOtp.textContent = '⏳ Đang gửi yêu cầu...';
+
+            try {
+                const response = await fetch('/admin/api/send-otp', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    infoBox.textContent = result.message || 'Mã OTP đã được gửi đến Telegram của bạn!';
+                    infoBox.style.display = 'block';
+                    startCooldown(60);
+                } else {
+                    errorBox.textContent = result.error || 'Không thể gửi mã OTP. Vui lòng thử lại.';
+                    errorBox.style.display = 'block';
+                    btnSendOtp.disabled = false;
+                    btnSendOtp.innerHTML = '<span>💬</span> Gửi lại mã OTP';
+                }
+            } catch (err) {
+                errorBox.textContent = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại.';
+                errorBox.style.display = 'block';
+                btnSendOtp.disabled = false;
+                btnSendOtp.innerHTML = '<span>💬</span> Gửi lại mã OTP';
+            }
+        });
+
+        // Cooldown timer function
+        function startCooldown(seconds) {
+            let remaining = seconds;
+            btnSendOtp.disabled = true;
+            btnSendOtp.textContent = `⏳ Gửi lại sau (${remaining}s)`;
+
+            const timer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    btnSendOtp.disabled = false;
+                    btnSendOtp.innerHTML = '<span>💬</span> Gửi lại mã OTP';
+                } else {
+                    btnSendOtp.textContent = `⏳ Gửi lại sau (${remaining}s)`;
+                }
+            }, 1000);
+        }
+
+        // Form Submit Login handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBox.style.display = 'none';
+
+            const otp = otpInput.value.trim();
+            if (!/^\d{6}$/.test(otp)) {
+                errorBox.textContent = 'Vui lòng nhập đúng mã OTP gồm 6 chữ số.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ otp })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    errorBox.textContent = result.error || 'Mã OTP không đúng hoặc đã hết hạn.';
+                    errorBox.style.display = 'block';
+                }
+            } catch (err) {
+                errorBox.textContent = 'Không thể kết nối đến máy chủ. Vui lòng thử lại.';
+                errorBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
