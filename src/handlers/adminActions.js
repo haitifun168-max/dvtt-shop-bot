@@ -776,7 +776,7 @@ module.exports = (bot) => {
     function showStats(ctx) {
         const stats = orderService.getStats();
         const db = require('../database');
-        const todayOrders = db.prepare("SELECT COUNT(*) as c, COALESCE(SUM(total_price),0) as s FROM orders WHERE status='delivered' AND date(delivered_at)=date('now')").get();
+        const todayOrders = db.prepare("SELECT COUNT(*) as c, COALESCE(SUM(total_price),0) as s FROM orders WHERE status='delivered' AND date(delivered_at, '+7 hours') = date('now', '+7 hours')").get();
 
         ctx.replyWithHTML(
             `📊 <b>THỐNG KÊ CHI TIẾT</b>\n\n` +
