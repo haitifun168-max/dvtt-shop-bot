@@ -182,6 +182,46 @@ function startWebhookServer(bot) {
     });
 
     // ═══════════════════════════════════════
+    // PUBLIC LANDING PAGE ROUTES
+    // ═══════════════════════════════════════
+
+    // GET / (Public Landing Page)
+    app.get('/', (req, res) => {
+        const filePath = path.join(__dirname, '..', 'public', 'index.html');
+        if (fs.existsSync(filePath)) {
+            res.send(fs.readFileSync(filePath, 'utf8'));
+        } else {
+            res.status(404).send('Landing page not found');
+        }
+    });
+
+    // GET /api/public/products (Public products API)
+    app.get('/api/public/products', (req, res) => {
+        try {
+            const categories = db.prepare('SELECT id, name, emoji FROM categories ORDER BY sort_order').all();
+            const products = db.prepare(`
+                SELECT p.id, p.category_id, p.name, p.price, p.emoji, p.description, p.promotion, p.contact_only, p.contact_url,
+                       (SELECT COUNT(*) FROM stock s WHERE s.product_id = p.id AND s.is_sold = 0) as stock_count
+                FROM products p
+                WHERE p.is_active = 1
+                ORDER BY p.category_id, p.id
+            `).all();
+
+            res.json({
+                success: true,
+                categories,
+                products,
+                botUsername: config.BOT_USERNAME || process.env.BOT_USERNAME || 'dvtt_shop_bot',
+                shopName: config.SHOP_NAME || 'DVTT Shop',
+                supportContact: config.SUPPORT_CONTACT || '@your_username'
+            });
+        } catch (err) {
+            console.error('API Public Products Error:', err.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+
+    // ═══════════════════════════════════════
     // WEB DASHBOARD ROUTES
     // ═══════════════════════════════════════
 

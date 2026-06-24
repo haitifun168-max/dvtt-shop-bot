@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVTT Shop — Hệ thống mua bán sản phẩm số tự động 24/7</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #07090e;
+            --bg-gradient: radial-gradient(circle at top, #0f1322 0%, #05060a 100%);
+            --card-bg: rgba(17, 25, 40, 0.5);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --neon-blue: #00f2fe;
+            --neon-pink: #ff007f;
+            --neon-green: #10b981;
+            --neon-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glow-blue: 0 0 20px rgba(0, 242, 254, 0.45);
+            --glow-green: 0 0 15px rgba(16, 185, 129, 0.4);
+            --glow-pink: 0 0 15px rgba(255, 0, 127, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Ambient glowing background blobs */
+        .glowing-blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, rgba(255, 0, 127, 0.02) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .blob-1 { top: 10%; left: -100px; }
+        .blob-2 { top: 50%; right: -100px; }
+        .blob-3 { bottom: 5%; left: 20%; }
+
+        /* Container & Navigation */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(7, 9, 14, 0.6);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-emoji {
+            font-size: 1.8rem;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px var(--neon-blue)); }
+            100% { transform: scale(1.15); filter: drop-shadow(0 0 10px var(--neon-blue)); }
+        }
+
+        .btn-top-bot {
+            padding: 10px 20px;
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
+        }
+
+        .btn-top-bot:hover {
+            background: var(--neon-blue);
+            color: #07090e;
+            box-shadow: var(--glow-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0 60px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 0, 127, 0.1);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            border-radius: 20px;
+            color: #ff007f;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.05);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff 40%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto 35px auto;
+        }
+
+        .hero-ctas {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--neon-blue), #3b82f6);
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.6);
+        }
+
+        .btn-secondary {
+            padding: 14px 32px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* 3-Steps How it works Section */
+        .how-it-works {
+            padding: 60px 0;
+            border-top: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(17, 25, 40, 0.2);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            margin-bottom: 10px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 35px 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 242, 254, 0.2);
+        }
+
+        .step-num {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 3rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            line-height: 1;
+            user-select: none;
+        }
+
+        .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 50%;
+        }
+
+        .step-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Products Catalog Section */
+        .catalog {
+            padding: 80px 0;
+        }
+
+        /* Category Filter Tabs */
+        .categories-filter {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 22px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.active {
+            background: var(--neon-blue);
+            color: #07090e;
+            border-color: var(--neon-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        /* Product Cards Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 242, 254, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 242, 254, 0.15);
+        }
+
+        /* Promo Badge */
+        .promo-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--neon-pink);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 10px;
+            box-shadow: var(--glow-pink);
+            z-index: 10;
+        }
+
+        .product-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .product-emoji {
+            font-size: 2.2rem;
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .product-title-area h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex-grow: 1;
+            min-height: 60px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 14px;
+        }
+
+        .product-price {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .stock-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .stock-in { background: rgba(16, 185, 129, 0.1); color: var(--neon-green); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .stock-low { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .stock-out { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        .btn-card-buy {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .btn-buy-active {
+            background: linear-gradient(to right, #3b82f6, #00f2fe);
+            color: #000000;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
+        }
+
+        .btn-buy-active:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-blue);
+        }
+
+        .btn-buy-contact {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+
+        .btn-buy-contact:hover {
+            background: var(--neon-green);
+            color: #07090e;
+            box-shadow: var(--glow-green);
+            transform: translateY(-2px);
+        }
+
+        .btn-buy-disabled {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            border: 1px solid var(--card-border);
+            cursor: not-allowed;
+        }
+
+        /* Loading Skeleton */
+        .skeleton-loader {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+        }
+
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: 260px;
+        }
+
+        .skeleton-pulse {
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: loadingPulse 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loadingPulse {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Call To Action Banner */
+        .cta-banner {
+            padding: 80px 0;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.05) 0%, rgba(255, 0, 127, 0.05) 100%);
+            border-top: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .cta-banner h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .cta-banner p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            background: #040508;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--neon-blue);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1.05rem;
+            }
+            .footer-wrapper {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient glowing blobs -->
+    <div class="glowing-blob blob-1"></div>
+    <div class="glowing-blob blob-2"></div>
+    <div class="glowing-blob blob-3"></div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="container nav-wrapper">
+            <div class="logo">
+                <span class="logo-emoji">🤖</span>
+                <span id="nav-shop-name">DVTT Shop</span>
+            </div>
+            <a href="#" id="nav-btn-bot" class="btn-top-bot" target="_blank">Mở Bot Telegram</a>
+        </div>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="hero container">
+        <span class="hero-badge">Hệ thống bán hàng tự động 24/7</span>
+        <h1 id="hero-title">Mua sản phẩm số tức thì</h1>
+        <p>Giao hàng tự động qua Telegram ngay khi thanh toán. Trải nghiệm nhanh chóng, bảo mật tuyệt đối.</p>
+        <div class="hero-ctas">
+            <a href="#products-catalog" class="btn-primary">
+                <span>🛒 Xem sản phẩm</span>
+            </a>
+            <a href="#" id="hero-btn-bot" class="btn-secondary" target="_blank">Chat với Bot</a>
+        </div>
+    </section>
+
+    <!-- 3-Steps How it works -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>Quy trình mua hàng tự động</h2>
+                <p>Chỉ với 3 bước đơn giản là bạn đã sở hữu sản phẩm mong muốn</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <span class="step-icon">📦</span>
+                    <h3>Chọn sản phẩm</h3>
+                    <p>Duyệt danh sách sản phẩm trên Website hoặc chat trực tiếp với Bot trên Telegram.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <span class="step-icon">💳</span>
+                    <h3>Quét mã thanh toán</h3>
+                    <p>Quét mã VietQR chứa sẵn số tiền và nội dung chuyển khoản đặc biệt.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <span class="step-icon">🔑</span>
+                    <h3>Nhận hàng lập tức</h3>
+                    <p>Hệ thống tự động kiểm tra số dư và giao Key/Tài khoản qua Telegram chỉ trong 5 giây.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section class="catalog container" id="products-catalog">
+        <div class="section-header">
+            <h2>Danh mục sản phẩm đang mở bán</h2>
+            <p>Chọn sản phẩm để đi đến khung chat mua hàng</p>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="categories-filter" id="categories-tabs">
+            <!-- Dynamically populated categories -->
+        </div>
+
+        <!-- Dynamic Product cards grid -->
+        <div class="products-grid" id="products-list">
+            <!-- Loading Skeleton -->
+            <div class="skeleton-loader">
+                <div class="skeleton-card">
+                    <div style="display:flex; gap: 15px; align-items:center;">
+                        <div class="skeleton-pulse" style="width:54px; height:54px; border-radius:12px;"></div>
+                        <div style="flex-grow:1; display:flex; flex-direction:column; gap:8px;">
+                            <div class="skeleton-pulse" style="width:60%; height:18px;"></div>
+                            <div class="skeleton-pulse" style="width:40%; height:12px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-pulse" style="width:100%; height:40px; margin-top:10px;"></div>
+                    <div class="skeleton-pulse" style="width:100%; height:45px; border-radius:12px; margin-top:auto;"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div style="display:flex; gap: 15px; align-items:center;">
+                        <div class="skeleton-pulse" style="width:54px; height:54px; border-radius:12px;"></div>
+                        <div style="flex-grow:1; display:flex; flex-direction:column; gap:8px;">
+                            <div class="skeleton-pulse" style="width:70%; height:18px;"></div>
+                            <div class="skeleton-pulse" style="width:30%; height:12px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-pulse" style="width:100%; height:40px; margin-top:10px;"></div>
+                    <div class="skeleton-pulse" style="width:100%; height:45px; border-radius:12px; margin-top:auto;"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div style="display:flex; gap: 15px; align-items:center;">
+                        <div class="skeleton-pulse" style="width:54px; height:54px; border-radius:12px;"></div>
+                        <div style="flex-grow:1; display:flex; flex-direction:column; gap:8px;">
+                            <div class="skeleton-pulse" style="width:80%; height:18px;"></div>
+                            <div class="skeleton-pulse" style="width:40%; height:12px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-pulse" style="width:100%; height:40px; margin-top:10px;"></div>
+                    <div class="skeleton-pulse" style="width:100%; height:45px; border-radius:12px; margin-top:auto;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call To Action Banner -->
+    <section class="cta-banner">
+        <div class="container">
+            <h2>Nạp ví số dư để mua hàng không độ trễ</h2>
+            <p>Sử dụng lệnh nạp ví <code>/nap</code> để nạp số dư, mua hàng cực nhanh chỉ với 1 lượt click chuột mà không cần quét mã ngân hàng lại nhiều lần.</p>
+            <a href="#" id="cta-btn-bot" class="btn-primary" style="margin: 0 auto;" target="_blank">
+                <span>💬 Bắt đầu chat với Bot</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-wrapper">
+            <div>
+                <p>&copy; 2026 <span id="footer-shop-name">DVTT Shop</span>. All Rights Reserved.</p>
+                <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-muted);">Sản phẩm được giao tự động qua Bot Telegram của shop.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#" id="footer-link-support" target="_blank">Hỗ trợ khách hàng</a>
+                <a href="/admin/login">Bảng quản trị</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allProducts = [];
+        let allCategories = [];
+        let botUsername = "dvtt_shop_bot";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchProducts();
+        });
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/api/public/products');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allProducts = data.products;
+                    allCategories = data.categories;
+                    botUsername = data.botUsername;
+                    
+                    // Update shop name and links
+                    document.title = `${data.shopName} — Hệ thống mua bán sản phẩm số tự động 24/7`;
+                    document.getElementById('nav-shop-name').innerText = data.shopName;
+                    document.getElementById('footer-shop-name').innerText = data.shopName;
+                    document.getElementById('hero-title').innerText = `Mua sản phẩm số tại ${data.shopName}`;
+                    
+                    const botLink = `https://t.me/${botUsername}`;
+                    document.getElementById('nav-btn-bot').href = botLink;
+                    document.getElementById('hero-btn-bot').href = botLink;
+                    document.getElementById('cta-btn-bot').href = botLink;
+                    
+                    const supportLink = `https://t.me/${data.supportContact.replace('@', '')}`;
+                    document.getElementById('footer-link-support').href = supportLink;
+
+                    renderCategories();
+                    renderProducts('all');
+                } else {
+                    showError();
+                }
+            } catch (err) {
+                console.error("Lỗi fetch sản phẩm:", err);
+                showError();
+            }
+        }
+
+        function renderCategories() {
+            const tabsContainer = document.getElementById('categories-tabs');
+            tabsContainer.innerHTML = '';
+
+            // Add "Tất cả" tab
+            const allBtn = document.createElement('button');
+            allBtn.className = 'filter-btn active';
+            allBtn.innerText = '✨ Tất cả';
+            allBtn.onclick = () => filterCategory('all', allBtn);
+            tabsContainer.appendChild(allBtn);
+
+            // Add other category tabs
+            allCategories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.innerText = `${cat.emoji} ${cat.name}`;
+                btn.onclick = () => filterCategory(cat.id, btn);
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function filterCategory(catId, btnEl) {
+            // Remove active classes
+            const btns = document.querySelectorAll('.filter-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            // Add active class to clicked button
+            btnEl.classList.add('active');
+
+            renderProducts(catId);
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+        }
+
+        function renderProducts(catId) {
+            const productsContainer = document.getElementById('products-list');
+            productsContainer.innerHTML = '';
+
+            const filtered = catId === 'all' 
+                ? allProducts 
+                : allProducts.filter(p => p.category_id === parseInt(catId));
+
+            if (filtered.length === 0) {
+                productsContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+                        <p style="font-size: 1.2rem;">📦 Chưa có sản phẩm nào thuộc danh mục này.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                // Promotion badge
+                let promoHTML = p.promotion ? `<span class="promo-badge">${p.promotion}</span>` : '';
+
+                // Stock status
+                let stockHTML = '';
+                let buttonHTML = '';
+                const deepLink = `https://t.me/${botUsername}?start=buy_${p.id}`;
+
+                if (p.contact_only) {
+                    stockHTML = `<span class="stock-status stock-low">📞 Liên hệ</span>`;
+                    buttonHTML = `<a href="https://t.me/${p.contact_url ? p.contact_url.replace('@', '') : 'your_username'}" class="btn-card-buy btn-buy-contact" target="_blank">Liên hệ mua</a>`;
+                } else if (p.stock_count > 0) {
+                    stockHTML = `<span class="stock-status stock-in">Còn ${p.stock_count}</span>`;
+                    buttonHTML = `<a href="${deepLink}" class="btn-card-buy btn-buy-active" target="_blank">Mua trên Bot</a>`;
+                } else {
+                    stockHTML = `<span class="stock-status stock-out">Hết hàng</span>`;
+                    buttonHTML = `<button class="btn-card-buy btn-buy-disabled" disabled>Hết hàng</button>`;
+                }
+
+                card.innerHTML = `
+                    ${promoHTML}
+                    <div class="product-header">
+                        <div class="product-emoji">${p.emoji || '📦'}</div>
+                        <div class="product-title-area">
+                            <h3>${p.name}</h3>
+                        </div>
+                    </div>
+                    <p class="product-desc">${p.description || 'Không có mô tả chi tiết cho sản phẩm này.'}</p>
+                    <div class="product-meta">
+                        <div class="product-price">
+                            <span class="price-label">Giá bán</span>
+                            <span class="price-value">${formatPrice(p.price)}</span>
+                        </div>
+                        ${stockHTML}
+                    </div>
+                    ${buttonHTML}
+                `;
+
+                productsContainer.appendChild(card);
+            });
+        }
+
+        function showError() {
+            const productsContainer = document.getElementById('products-list');
+            productsContainer.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--neon-red);">
+                    <p style="font-size: 1.2rem;">❌ Không thể kết nối tới máy chủ để tải sản phẩm. Vui lòng thử lại sau.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

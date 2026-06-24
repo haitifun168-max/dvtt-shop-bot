@@ -60,6 +60,14 @@ bot.launch()
         console.log(`🤖 ${config.SHOP_NAME} Bot đã khởi động!`);
         console.log(`👤 Admin ID: ${config.ADMIN_ID}`);
         console.log(`🏦 Bank: ${config.BANK.NAME} - ${config.BANK.ACCOUNT}`);
+        
+        // Fetch and save bot username dynamically
+        bot.telegram.getMe().then((me) => {
+            config.BOT_USERNAME = me.username;
+            console.log(`👤 Bot Username: @${me.username}`);
+        }).catch((err) => {
+            console.error('⚠️ Không thể lấy thông tin Bot Username:', err.message);
+        });
     })
     .catch((err) => {
         console.error('❌ Không thể khởi động bot:', err.message);
