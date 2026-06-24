@@ -21,7 +21,7 @@ module.exports = {
     } : null,
 
     // Payment
-    WEBHOOK_PORT: parseInt(process.env.WEBHOOK_PORT) || 3000,
+    WEBHOOK_PORT: parseInt(process.env.PORT) || parseInt(process.env.WEBHOOK_PORT) || 3000,
     SEPAY_API_KEY: process.env.SEPAY_API_KEY || '',
     DASHBOARD_TOKEN: process.env.DASHBOARD_TOKEN || 'SP_KEY_9F2D7B4C8E6A1C5E3B8D9F2A',
 
